@@ -28,6 +28,15 @@ export async function getMe(): Promise<AppUser> {
   return res.data;
 }
 
+export async function updateProfile(data: {
+  name?: string;
+  course?: string;
+  semester?: number;
+}): Promise<AppUser> {
+  const res = await api.patch('/api/auth/profile', data);
+  return res.data;
+}
+
 export async function logout() {
   await signOut(auth);
 }

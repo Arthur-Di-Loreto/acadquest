@@ -1,8 +1,10 @@
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert } from 'react-native';
+import { useRouter } from 'expo-router';
 import { useAuthStore } from '../../src/store/useAuthStore';
 import { logout } from '../../src/services/authService';
 
 export default function ProfileScreen() {
+  const router = useRouter();
   const { appUser, reset } = useAuthStore();
 
   async function handleLogout() {
@@ -87,6 +89,11 @@ export default function ProfileScreen() {
         )}
       </View>
 
+      {/* Editar perfil */}
+      <TouchableOpacity style={s.editBtn} onPress={() => router.push('/edit-profile')}>
+        <Text style={s.editBtnText}>Editar perfil</Text>
+      </TouchableOpacity>
+
       {/* Logout */}
       <TouchableOpacity style={s.logoutBtn} onPress={handleLogout}>
         <Text style={s.logoutText}>Sair da conta</Text>
@@ -137,6 +144,11 @@ const s = StyleSheet.create({
   clanActive: { color: '#4CAF50', fontSize: 14 },
   clanEmpty: { color: '#666', fontSize: 13, lineHeight: 20 },
 
+  editBtn: {
+    backgroundColor: '#0F3460', borderRadius: 10,
+    paddingVertical: 14, alignItems: 'center', marginBottom: 10,
+  },
+  editBtnText: { color: '#fff', fontWeight: 'bold', fontSize: 15 },
   logoutBtn: {
     borderWidth: 1, borderColor: '#E94560', borderRadius: 10,
     paddingVertical: 14, alignItems: 'center', marginTop: 8,

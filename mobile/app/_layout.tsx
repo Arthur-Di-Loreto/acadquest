@@ -60,6 +60,7 @@ export default function RootLayout() {
       <Stack.Screen name="register" />
       <Stack.Screen name="(tabs)" />
       <Stack.Screen name="create-mission" />
+      <Stack.Screen name="edit-profile" />
     </Stack>
   );
 }
