@@ -6,6 +6,7 @@ import authRoutes from './routes/auth';
 import missionRoutes from './routes/missions';
 import clanRoutes from './routes/clans';
 import rankingRoutes from './routes/ranking';
+import { startExpirationJob } from './jobs/expireMissions';
 
 const app = express();
 app.use(cors());
@@ -26,6 +27,7 @@ async function start() {
 
   await mongoose.connect(uri);
   console.log('MongoDB conectado');
+  startExpirationJob();
 
   const port = process.env.PORT ?? 3000;
   app.listen(port, () => console.log(`Servidor rodando na porta ${port}`));
