@@ -21,12 +21,12 @@ export interface ClanRank {
   isMine: boolean;
 }
 
-export async function getPlayerRanking(): Promise<{ course: string; semester: number; players: PlayerRank[] }> {
+export async function getPlayerRanking(): Promise<{ players: PlayerRank[] }> {
   const res = await api.get('/api/ranking/players');
   return res.data;
 }
 
-export async function getClanRanking(): Promise<{ course: string; semester: number; clans: ClanRank[] }> {
+export async function getClanRanking(): Promise<{ clans: ClanRank[] }> {
   const res = await api.get('/api/ranking/clans');
   return res.data;
 }

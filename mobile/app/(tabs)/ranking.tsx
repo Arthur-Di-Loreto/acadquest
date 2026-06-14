@@ -13,7 +13,6 @@ export default function RankingScreen() {
   const [tab, setTab] = useState<Tab>('players');
   const [players, setPlayers] = useState<PlayerRank[]>([]);
   const [clans, setClans] = useState<ClanRank[]>([]);
-  const [meta, setMeta] = useState<{ course: string; semester: number } | null>(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 
@@ -22,7 +21,6 @@ export default function RankingScreen() {
       const [pr, cr] = await Promise.all([getPlayerRanking(), getClanRanking()]);
       setPlayers(pr.players);
       setClans(cr.clans);
-      setMeta({ course: pr.course, semester: pr.semester });
     } catch {
       // mantém dados anteriores
     } finally {
@@ -37,8 +35,8 @@ export default function RankingScreen() {
     <View style={s.container}>
       {/* Header */}
       <View style={s.header}>
-        <Text style={s.title}>Ranking</Text>
-        {meta && <Text style={s.sub}>{meta.course} · {meta.semester}º semestre</Text>}
+        <Text style={s.title}>Ranking Global</Text>
+        <Text style={s.sub}>Top 50 jogadores e clãs</Text>
       </View>
 
       {/* Tabs */}

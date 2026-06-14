@@ -6,13 +6,13 @@ import { Clan } from '../models/Clan';
 const router = Router();
 router.use(authMiddleware);
 
-// GET /api/ranking/players — top jogadores do mesmo curso e semestre
+// GET /api/ranking/players — top jogadores globais
 router.get('/players', async (req: AuthRequest, res: Response) => {
   try {
     const me = await User.findOne({ firebaseUid: req.uid });
     if (!me) { res.status(404).json({ error: 'Usuário não encontrado' }); return; }
 
-    const players = await User.find({ course: me.course, semester: me.semester })
+    const players = await User.find()
       .sort({ xp: -1 })
       .limit(50)
       .select('name xp level hp clan');
@@ -27,20 +27,19 @@ router.get('/players', async (req: AuthRequest, res: Response) => {
       isMe: (p._id as any).toString() === (me._id as any).toString(),
     }));
 
-    res.json({ course: me.course, semester: me.semester, players: result });
+    res.json({ players: result });
   } catch {
     res.status(500).json({ error: 'Erro ao buscar ranking' });
   }
 });
 
-// GET /api/ranking/clans — top clãs do mesmo curso e semestre (por XP total dos membros)
+// GET /api/ranking/clans — top clãs globais (por XP total dos membros)
 router.get('/clans', async (req: AuthRequest, res: Response) => {
   try {
     const me = await User.findOne({ firebaseUid: req.uid });
     if (!me) { res.status(404).json({ error: 'Usuário não encontrado' }); return; }
 
-    const clans = await Clan.find({ course: me.course, semester: me.semester })
-      .populate('members', 'xp');
+    const clans = await Clan.find().populate('members', 'xp');
 
     const ranked = clans
       .map((c) => ({
@@ -55,7 +54,7 @@ router.get('/clans', async (req: AuthRequest, res: Response) => {
       .sort((a, b) => b.totalXp - a.totalXp)
       .map((c, i) => ({ ...c, position: i + 1 }));
 
-    res.json({ course: me.course, semester: me.semester, clans: ranked });
+    res.json({ clans: ranked });
   } catch {
     res.status(500).json({ error: 'Erro ao buscar ranking de clãs' });
   }
