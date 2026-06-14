@@ -1,5 +1,6 @@
 import { Mission } from '../models/Mission';
 import { User } from '../models/User';
+import { applyLevelUp } from '../utils/levelUp';
 
 export async function expireMissions() {
   try {

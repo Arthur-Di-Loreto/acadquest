@@ -23,7 +23,7 @@ export default function ProfileScreen() {
   const maxHp = appUser.maxHp ?? 100;
   const hpPercent = Math.max(0, Math.min((hp / maxHp) * 100, 100));
   const xpToNext = appUser.level * 100;
-  const xpProgress = appUser.xp % xpToNext;
+  const xpProgress = appUser.xp;
   const xpPercent = Math.min((xpProgress / xpToNext) * 100, 100);
 
   return (

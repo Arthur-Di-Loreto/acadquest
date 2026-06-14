@@ -2,6 +2,7 @@ import { Router, Response } from 'express';
 import { authMiddleware, AuthRequest } from '../middleware/auth';
 import { Mission } from '../models/Mission';
 import { User } from '../models/User';
+import { applyLevelUp } from '../utils/levelUp';
 
 const router = Router();
 router.use(authMiddleware);
@@ -77,11 +78,13 @@ router.patch('/:id/complete', async (req: AuthRequest, res: Response) => {
     mission.completedAt = new Date();
     await mission.save();
 
-    // XP para todos os membros atribuídos
-    await User.updateMany(
-      { _id: { $in: mission.assignedTo } },
-      { $inc: { xp: mission.xpReward } },
-    );
+    // XP para todos os membros atribuídos + verificar level up
+    const members = await User.find({ _id: { $in: mission.assignedTo } });
+    for (const member of members) {
+      member.xp += mission.xpReward;
+      applyLevelUp(member);
+      await member.save();
+    }
 
     res.json(mission);
   } catch {
