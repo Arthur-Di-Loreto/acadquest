@@ -4,27 +4,27 @@ export interface IUser extends Document {
   firebaseUid: string;
   name: string;
   email: string;
-  avatar?: string;
   xp: number;
   level: number;
+  hp: number;
+  maxHp: number;
   clan?: Types.ObjectId;
   semester: number;
   course: string;
-  createdAt: Date;
-  updatedAt: Date;
 }
 
 const userSchema = new Schema<IUser>(
   {
-    firebaseUid: { type: String, required: true, unique: true, index: true },
-    name: { type: String, required: true, trim: true },
-    email: { type: String, required: true, unique: true, lowercase: true },
-    avatar: { type: String },
-    xp: { type: Number, default: 0, min: 0 },
-    level: { type: Number, default: 1, min: 1 },
-    clan: { type: Schema.Types.ObjectId, ref: 'Clan' },
-    semester: { type: Number, required: true, min: 1, max: 10 },
-    course: { type: String, required: true, trim: true },
+    firebaseUid: { type: String, required: true, unique: true },
+    name: { type: String, required: true },
+    email: { type: String, required: true, unique: true },
+    xp: { type: Number, default: 0 },
+    level: { type: Number, default: 1 },
+    hp: { type: Number, default: 100 },
+    maxHp: { type: Number, default: 100 },
+    clan: { type: Schema.Types.ObjectId, ref: 'Clan', default: null },
+    semester: { type: Number, required: true },
+    course: { type: String, required: true },
   },
   { timestamps: true },
 );

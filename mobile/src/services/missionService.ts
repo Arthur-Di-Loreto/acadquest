@@ -1,32 +1,41 @@
-import { api } from './api';
+import api from '../config/api';
 
-export interface CreateMissionPayload {
+export interface Mission {
+  _id: string;
   title: string;
   description: string;
-  type: 'tcc' | 'integrador' | 'seminario' | 'artigo' | 'outro';
+  type: string;
+  status: 'pending' | 'completed' | 'failed';
   xpReward: number;
   hpPenalty: number;
   deadline: string;
-  clanId: string;
-  assignedTo?: string[];
+  clan?: string;
 }
 
-export async function createMission(payload: CreateMissionPayload) {
-  const { data } = await api.post('/api/missions', payload);
-  return data.mission;
+export async function getMyMissions(): Promise<{ personal: Mission[]; clan: Mission[] }> {
+  const res = await api.get('/api/missions/me');
+  return res.data;
 }
 
-export async function getClanMissions(clanId: string) {
-  const { data } = await api.get(`/api/missions/clan/${clanId}`);
-  return data.missions;
+export async function createMission(data: {
+  title: string;
+  description: string;
+  type: string;
+  xpReward: number;
+  hpPenalty: number;
+  deadline: string;
+  assignToClan: boolean;
+}) {
+  const res = await api.post('/api/missions', data);
+  return res.data;
 }
 
 export async function completeMission(id: string) {
-  const { data } = await api.patch(`/api/missions/${id}/complete`);
-  return data.mission;
+  const res = await api.patch(`/api/missions/${id}/complete`);
+  return res.data;
 }
 
 export async function failMission(id: string) {
-  const { data } = await api.patch(`/api/missions/${id}/fail`);
-  return data;
+  const res = await api.patch(`/api/missions/${id}/fail`);
+  return res.data;
 }

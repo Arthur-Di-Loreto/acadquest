@@ -1,17 +1,35 @@
 import 'dotenv/config';
-import app from './app';
-import { connectDB } from './config/database';
+import express from 'express';
+import cors from 'cors';
+import mongoose from 'mongoose';
+import authRoutes from './routes/auth';
+import missionRoutes from './routes/missions';
+import clanRoutes from './routes/clans';
 
-const PORT = process.env.PORT ?? 3000;
+const app = express();
+app.use(cors());
+app.use(express.json());
 
-async function bootstrap() {
-  await connectDB();
-  app.listen(PORT, () => {
-    console.log(`[server] Running on port ${PORT} in ${process.env.NODE_ENV} mode`);
-  });
+app.get('/health', (_req, res) => {
+  res.json({ status: 'ok' });
+});
+
+app.use('/api/auth', authRoutes);
+app.use('/api/missions', missionRoutes);
+app.use('/api/clans', clanRoutes);
+
+async function start() {
+  const uri = process.env.MONGODB_URI;
+  if (!uri) throw new Error('MONGODB_URI não definido no .env');
+
+  await mongoose.connect(uri);
+  console.log('MongoDB conectado');
+
+  const port = process.env.PORT ?? 3000;
+  app.listen(port, () => console.log(`Servidor rodando na porta ${port}`));
 }
 
-bootstrap().catch((err) => {
-  console.error('[server] Fatal error during startup:', err);
+start().catch((err) => {
+  console.error('Erro ao iniciar:', err.message);
   process.exit(1);
 });

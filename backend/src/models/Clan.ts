@@ -2,31 +2,29 @@ import { Schema, model, Document, Types } from 'mongoose';
 
 export interface IClan extends Document {
   name: string;
-  description?: string;
-  emblem?: string;
+  code: string;
+  leader: Types.ObjectId;
+  members: Types.ObjectId[];
   hp: number;
   maxHp: number;
-  xp: number;
-  members: Types.ObjectId[];
-  leader: Types.ObjectId;
-  semester: number;
   course: string;
-  createdAt: Date;
-  updatedAt: Date;
+  semester: number;
+}
+
+function generateCode() {
+  return Math.random().toString(36).substring(2, 8).toUpperCase();
 }
 
 const clanSchema = new Schema<IClan>(
   {
-    name: { type: String, required: true, trim: true, unique: true },
-    description: { type: String, trim: true },
-    emblem: { type: String },
-    hp: { type: Number, default: 100, min: 0 },
-    maxHp: { type: Number, default: 100 },
-    xp: { type: Number, default: 0, min: 0 },
-    members: [{ type: Schema.Types.ObjectId, ref: 'User' }],
+    name: { type: String, required: true, unique: true },
+    code: { type: String, unique: true, default: generateCode },
     leader: { type: Schema.Types.ObjectId, ref: 'User', required: true },
-    semester: { type: Number, required: true, min: 1, max: 10 },
-    course: { type: String, required: true, trim: true },
+    members: [{ type: Schema.Types.ObjectId, ref: 'User' }],
+    hp: { type: Number, default: 500 },
+    maxHp: { type: Number, default: 500 },
+    course: { type: String, required: true },
+    semester: { type: Number, required: true },
   },
   { timestamps: true },
 );

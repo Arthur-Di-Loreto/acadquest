@@ -1,42 +1,33 @@
-import {
-  createUserWithEmailAndPassword,
-  signInWithEmailAndPassword,
-  signOut,
-  UserCredential,
-} from 'firebase/auth';
+import { signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut } from 'firebase/auth';
 import { auth } from '../config/firebase';
-import { api } from './api';
+import api from '../config/api';
+import { AppUser } from '../store/useAuthStore';
 
-export interface RegisterPayload {
+export async function login(email: string, password: string) {
+  await signInWithEmailAndPassword(auth, email, password);
+}
+
+export async function register(data: {
   name: string;
   email: string;
   password: string;
   semester: number;
   course: string;
-}
-
-export async function register(payload: RegisterPayload): Promise<UserCredential> {
-  const credential = await createUserWithEmailAndPassword(auth, payload.email, payload.password);
-
+}) {
+  await createUserWithEmailAndPassword(auth, data.email, data.password);
   await api.post('/api/auth/register', {
-    name: payload.name,
-    email: payload.email,
-    semester: payload.semester,
-    course: payload.course,
+    name: data.name,
+    email: data.email,
+    semester: data.semester,
+    course: data.course,
   });
-
-  return credential;
 }
 
-export async function login(email: string, password: string): Promise<UserCredential> {
-  return signInWithEmailAndPassword(auth, email, password);
+export async function getMe(): Promise<AppUser> {
+  const res = await api.get('/api/auth/me');
+  return res.data;
 }
 
-export async function logout(): Promise<void> {
-  return signOut(auth);
-}
-
-export async function getMe() {
-  const { data } = await api.get('/api/auth/me');
-  return data.user;
+export async function logout() {
+  await signOut(auth);
 }
