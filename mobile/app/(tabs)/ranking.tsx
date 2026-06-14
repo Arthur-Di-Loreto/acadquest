@@ -60,7 +60,7 @@ export default function RankingScreen() {
         >
           {tab === 'players' ? (
             players.length === 0
-              ? <Text style={s.empty}>Nenhum jogador encontrado no seu curso e semestre.</Text>
+              ? <Text style={s.empty}>Nenhum jogador encontrado.</Text>
               : players.map((p) => (
                 <View key={p._id} style={[s.card, p.isMe && s.cardMe]}>
                   <Text style={s.position}>
@@ -78,7 +78,7 @@ export default function RankingScreen() {
               ))
           ) : (
             clans.length === 0
-              ? <Text style={s.empty}>Nenhum clã encontrado no seu curso e semestre.</Text>
+              ? <Text style={s.empty}>Nenhum clã encontrado.</Text>
               : clans.map((c) => (
                 <View key={c._id.toString()} style={[s.card, c.isMine && s.cardMe]}>
                   <Text style={s.position}>
