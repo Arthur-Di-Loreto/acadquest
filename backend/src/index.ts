@@ -5,6 +5,7 @@ import mongoose from 'mongoose';
 import authRoutes from './routes/auth';
 import missionRoutes from './routes/missions';
 import clanRoutes from './routes/clans';
+import rankingRoutes from './routes/ranking';
 
 const app = express();
 app.use(cors());
@@ -17,6 +18,7 @@ app.get('/health', (_req, res) => {
 app.use('/api/auth', authRoutes);
 app.use('/api/missions', missionRoutes);
 app.use('/api/clans', clanRoutes);
+app.use('/api/ranking', rankingRoutes);
 
 async function start() {
   const uri = process.env.MONGODB_URI;
