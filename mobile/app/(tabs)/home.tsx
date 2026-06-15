@@ -65,6 +65,7 @@ export default function HomeScreen() {
   }
 
   const checkedIn = alreadyCheckedInToday();
+  const streak = appUser.checkInStreak ?? 0;
 
   const hp = appUser.hp ?? 100;
   const maxHp = appUser.maxHp ?? 100;
@@ -129,13 +130,13 @@ export default function HomeScreen() {
               <Text style={s.checkInText}>{checkedIn ? 'Check-in feito!' : 'Check-in diário'}</Text>
               <Text style={s.checkInSub}>
                 {checkedIn
-                  ? `Streak: ${appUser.checkInStreak} dia${appUser.checkInStreak !== 1 ? 's' : ''}`
-                  : `Streak atual: ${appUser.checkInStreak} dia${appUser.checkInStreak !== 1 ? 's' : ''}`}
+                  ? `Streak: ${streak} dia${streak !== 1 ? 's' : ''}`
+                  : `Streak atual: ${streak} dia${streak !== 1 ? 's' : ''}`}
               </Text>
             </View>
             {!checkedIn && (
               <Text style={s.checkInReward}>
-                +{Math.min(20 + appUser.checkInStreak * 5, 50)} XP
+                +{Math.min(20 + streak * 5, 50)} XP
               </Text>
             )}
           </View>
