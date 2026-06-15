@@ -1,6 +1,8 @@
 import { Router, Response } from 'express';
 import { authMiddleware, AuthRequest } from '../middleware/auth';
 import { User } from '../models/User';
+import { XpLog } from '../models/XpLog';
+import { applyLevelUp } from '../utils/levelUp';
 
 const router = Router();
 
@@ -63,6 +65,52 @@ router.patch('/profile', authMiddleware, async (req: AuthRequest, res: Response)
     res.json(user);
   } catch {
     res.status(500).json({ error: 'Erro ao atualizar perfil' });
+  }
+});
+
+// POST /api/auth/checkin — check-in diário
+router.post('/checkin', authMiddleware, async (req: AuthRequest, res: Response) => {
+  try {
+    const user = await User.findOne({ firebaseUid: req.uid });
+    if (!user) { res.status(404).json({ error: 'Usuário não encontrado' }); return; }
+
+    const now = new Date();
+    const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+
+    // Já fez check-in hoje?
+    if (user.lastCheckIn && user.lastCheckIn >= todayStart) {
+      res.status(400).json({ error: 'Você já fez check-in hoje.' });
+      return;
+    }
+
+    // Calcular streak
+    const yesterdayStart = new Date(todayStart);
+    yesterdayStart.setDate(yesterdayStart.getDate() - 1);
+    const wasYesterday = user.lastCheckIn && user.lastCheckIn >= yesterdayStart && user.lastCheckIn < todayStart;
+    const newStreak = wasYesterday ? user.checkInStreak + 1 : 1;
+
+    // Recompensas: XP escala com streak (20 base +5/dia, cap 50), HP +10
+    const xpGain = Math.min(20 + (newStreak - 1) * 5, 50);
+    const hpGain = 10;
+
+    user.xp += xpGain;
+    user.hp = Math.min(user.hp + hpGain, user.maxHp);
+    user.lastCheckIn = now;
+    user.checkInStreak = newStreak;
+    const leveled = applyLevelUp(user);
+    await user.save();
+
+    await XpLog.create({
+      user: user._id,
+      amount: xpGain,
+      reason: leveled
+        ? `Check-in dia ${newStreak} (+nível!)`
+        : `Check-in dia ${newStreak}`,
+    });
+
+    res.json({ user, rewards: { xp: xpGain, hp: hpGain, streak: newStreak } });
+  } catch {
+    res.status(500).json({ error: 'Erro ao realizar check-in' });
   }
 });
 

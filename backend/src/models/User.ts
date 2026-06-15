@@ -11,6 +11,8 @@ export interface IUser extends Document {
   clan?: Types.ObjectId;
   semester: number;
   course: string;
+  lastCheckIn?: Date;
+  checkInStreak: number;
 }
 
 const userSchema = new Schema<IUser>(
@@ -25,6 +27,8 @@ const userSchema = new Schema<IUser>(
     clan: { type: Schema.Types.ObjectId, ref: 'Clan', default: null },
     semester: { type: Number, required: true },
     course: { type: String, required: true },
+    lastCheckIn: { type: Date, default: null },
+    checkInStreak: { type: Number, default: 0 },
   },
   { timestamps: true },
 );

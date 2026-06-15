@@ -37,6 +37,11 @@ export async function updateProfile(data: {
   return res.data;
 }
 
+export async function checkIn(): Promise<{ user: AppUser; rewards: { xp: number; hp: number; streak: number } }> {
+  const res = await api.post('/api/auth/checkin');
+  return res.data;
+}
+
 export async function logout() {
   await signOut(auth);
 }

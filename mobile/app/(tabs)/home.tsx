@@ -6,7 +6,7 @@ import {
 import { useRouter } from 'expo-router';
 import { useAuthStore } from '../../src/store/useAuthStore';
 import { getMyMissions, completeMission, failMission, Mission } from '../../src/services/missionService';
-import { getMe } from '../../src/services/authService';
+import { getMe, checkIn } from '../../src/services/authService';
 
 const TYPE_LABEL: Record<string, string> = {
   tcc: 'TCC', integrador: 'Integrador', seminario: 'Seminário', artigo: 'Artigo', outro: 'Outro',
@@ -19,6 +19,7 @@ export default function HomeScreen() {
   const [clan, setClan] = useState<Mission[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [checkingIn, setCheckingIn] = useState(false);
 
   const load = useCallback(async () => {
     try {
@@ -36,7 +37,34 @@ export default function HomeScreen() {
 
   useEffect(() => { load(); }, [load]);
 
+  async function handleCheckIn() {
+    setCheckingIn(true);
+    try {
+      const { user, rewards } = await checkIn();
+      setAppUser(user);
+      Alert.alert(
+        `Dia ${rewards.streak} consecutivo!`,
+        `+${rewards.xp} XP  •  +${rewards.hp} HP recuperado`,
+      );
+    } catch {
+      Alert.alert('Check-in', 'Você já fez check-in hoje. Volte amanhã!');
+    } finally {
+      setCheckingIn(false);
+    }
+  }
+
   if (!appUser) return null;
+
+  function alreadyCheckedInToday() {
+    if (!appUser?.lastCheckIn) return false;
+    const last = new Date(appUser.lastCheckIn);
+    const now = new Date();
+    return last.getFullYear() === now.getFullYear()
+      && last.getMonth() === now.getMonth()
+      && last.getDate() === now.getDate();
+  }
+
+  const checkedIn = alreadyCheckedInToday();
 
   const hp = appUser.hp ?? 100;
   const maxHp = appUser.maxHp ?? 100;
@@ -85,6 +113,34 @@ export default function HomeScreen() {
           <Text style={s.statValue}>{xpProgress}/{xpToNext}</Text>
         </View>
       </View>
+
+      {/* Check-in diário */}
+      <TouchableOpacity
+        style={[s.checkInBtn, checkedIn && s.checkInBtnDone]}
+        onPress={handleCheckIn}
+        disabled={checkedIn || checkingIn}
+      >
+        {checkingIn ? (
+          <ActivityIndicator color="#fff" />
+        ) : (
+          <View style={s.checkInInner}>
+            <Text style={s.checkInIcon}>{checkedIn ? '✓' : '☀'}</Text>
+            <View>
+              <Text style={s.checkInText}>{checkedIn ? 'Check-in feito!' : 'Check-in diário'}</Text>
+              <Text style={s.checkInSub}>
+                {checkedIn
+                  ? `Streak: ${appUser.checkInStreak} dia${appUser.checkInStreak !== 1 ? 's' : ''}`
+                  : `Streak atual: ${appUser.checkInStreak} dia${appUser.checkInStreak !== 1 ? 's' : ''}`}
+              </Text>
+            </View>
+            {!checkedIn && (
+              <Text style={s.checkInReward}>
+                +{Math.min(20 + appUser.checkInStreak * 5, 50)} XP
+              </Text>
+            )}
+          </View>
+        )}
+      </TouchableOpacity>
 
       {/* Botão criar missão */}
       <TouchableOpacity style={s.createBtn} onPress={() => router.push('/create-mission')}>
@@ -202,6 +258,17 @@ const s = StyleSheet.create({
   hpBar: { backgroundColor: '#E94560' },
   xpBar: { backgroundColor: '#4CAF50' },
   statValue: { color: '#888', fontSize: 11, width: 56, textAlign: 'right' },
+
+  checkInBtn: {
+    backgroundColor: '#0F3460', borderRadius: 10, paddingVertical: 12,
+    paddingHorizontal: 16, marginBottom: 10, borderWidth: 1, borderColor: '#E94560',
+  },
+  checkInBtnDone: { borderColor: '#4CAF50', backgroundColor: '#0a2010' },
+  checkInInner: { flexDirection: 'row', alignItems: 'center', gap: 12 },
+  checkInIcon: { fontSize: 22, width: 28, textAlign: 'center' },
+  checkInText: { color: '#fff', fontWeight: 'bold', fontSize: 14 },
+  checkInSub: { color: '#888', fontSize: 11, marginTop: 1 },
+  checkInReward: { marginLeft: 'auto', color: '#4CAF50', fontWeight: 'bold', fontSize: 14 },
 
   createBtn: { backgroundColor: '#E94560', borderRadius: 10, paddingVertical: 14, alignItems: 'center', marginBottom: 20 },
   createBtnText: { color: '#fff', fontWeight: 'bold', fontSize: 16 },

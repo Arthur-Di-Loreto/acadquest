@@ -12,6 +12,8 @@ export interface AppUser {
   clan?: string;
   semester: number;
   course: string;
+  lastCheckIn?: string;
+  checkInStreak: number;
 }
 
 interface AuthState {
