@@ -42,6 +42,11 @@ export async function checkIn(): Promise<{ user: AppUser; rewards: { xp: number;
   return res.data;
 }
 
+export async function heal(): Promise<{ user: AppUser; gained: number }> {
+  const res = await api.post('/api/auth/heal');
+  return res.data;
+}
+
 export async function logout() {
   await signOut(auth);
 }

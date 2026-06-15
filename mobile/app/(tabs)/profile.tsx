@@ -1,11 +1,16 @@
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert } from 'react-native';
+import { useState } from 'react';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, ActivityIndicator } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useAuthStore } from '../../src/store/useAuthStore';
-import { logout } from '../../src/services/authService';
+import { logout, heal } from '../../src/services/authService';
+
+const POTION_COST = 30;
+const POTION_GAIN = 30;
 
 export default function ProfileScreen() {
   const router = useRouter();
-  const { appUser, reset } = useAuthStore();
+  const { appUser, setAppUser, reset } = useAuthStore();
+  const [healing, setHealing] = useState(false);
 
   async function handleLogout() {
     Alert.alert('Sair', 'Deseja sair da sua conta?', [
@@ -19,6 +24,31 @@ export default function ProfileScreen() {
     ]);
   }
 
+  async function handleHeal() {
+    Alert.alert(
+      'Poção de HP',
+      `Gastar ${POTION_COST} XP para recuperar ${POTION_GAIN} HP?`,
+      [
+        { text: 'Cancelar', style: 'cancel' },
+        {
+          text: 'Usar', onPress: async () => {
+            setHealing(true);
+            try {
+              const { user, gained } = await heal();
+              setAppUser(user);
+              Alert.alert('HP recuperado!', `+${gained} HP`);
+            } catch (err: any) {
+              const msg = err?.response?.data?.error ?? 'Não foi possível usar a poção.';
+              Alert.alert('Erro', msg);
+            } finally {
+              setHealing(false);
+            }
+          },
+        },
+      ],
+    );
+  }
+
   if (!appUser) return null;
 
   const hp = appUser.hp ?? 100;
@@ -27,6 +57,10 @@ export default function ProfileScreen() {
   const xpToNext = appUser.level * 100;
   const xpProgress = appUser.xp;
   const xpPercent = Math.min((xpProgress / xpToNext) * 100, 100);
+
+  const hpFull = hp >= maxHp;
+  const notEnoughXp = appUser.xp < POTION_COST;
+  const potionDisabled = hpFull || notEnoughXp || healing;
 
   return (
     <ScrollView style={s.container} contentContainerStyle={s.content}>
@@ -77,6 +111,24 @@ export default function ProfileScreen() {
             <Text style={s.infoLabel}>HP</Text>
           </View>
         </View>
+
+        {/* Poção de HP */}
+        <TouchableOpacity
+          style={[s.potionBtn, potionDisabled && s.potionBtnDisabled]}
+          onPress={handleHeal}
+          disabled={potionDisabled}
+        >
+          {healing ? (
+            <ActivityIndicator color="#fff" size="small" />
+          ) : (
+            <View style={s.potionInner}>
+              <Text style={s.potionIcon}>🧪</Text>
+              <Text style={[s.potionText, potionDisabled && s.potionTextDisabled]}>
+                {hpFull ? 'HP cheio' : notEnoughXp ? `XP insuficiente (${POTION_COST} XP)` : `Poção de HP  –${POTION_COST} XP / +${POTION_GAIN} HP`}
+              </Text>
+            </View>
+          )}
+        </TouchableOpacity>
       </View>
 
       {/* Clã */}
@@ -138,13 +190,21 @@ const s = StyleSheet.create({
   xpBar: { backgroundColor: '#4CAF50' },
   statValue: { color: '#888', fontSize: 11, width: 56, textAlign: 'right' },
 
-  infoRow: { flexDirection: 'row', marginTop: 8, gap: 8 },
-  infoBox: {
-    flex: 1, backgroundColor: '#0F3460', borderRadius: 10,
-    padding: 12, alignItems: 'center',
-  },
+  infoRow: { flexDirection: 'row', marginTop: 8, gap: 8, marginBottom: 14 },
+  infoBox: { flex: 1, backgroundColor: '#0F3460', borderRadius: 10, padding: 12, alignItems: 'center' },
   infoValue: { color: '#fff', fontSize: 20, fontWeight: 'bold' },
   infoLabel: { color: '#888', fontSize: 11, marginTop: 2 },
+
+  potionBtn: {
+    backgroundColor: '#0F3460', borderRadius: 10,
+    paddingVertical: 12, paddingHorizontal: 14,
+    borderWidth: 1, borderColor: '#E94560',
+  },
+  potionBtnDisabled: { borderColor: '#333', opacity: 0.5 },
+  potionInner: { flexDirection: 'row', alignItems: 'center', gap: 10 },
+  potionIcon: { fontSize: 20 },
+  potionText: { color: '#fff', fontWeight: '600', fontSize: 13, flex: 1 },
+  potionTextDisabled: { color: '#888' },
 
   clanActive: { color: '#4CAF50', fontSize: 14 },
   clanEmpty: { color: '#666', fontSize: 13, lineHeight: 20 },

@@ -114,6 +114,40 @@ router.post('/checkin', authMiddleware, async (req: AuthRequest, res: Response) 
   }
 });
 
+// POST /api/auth/heal — usa poção de HP (30 XP → +30 HP)
+router.post('/heal', authMiddleware, async (req: AuthRequest, res: Response) => {
+  try {
+    const user = await User.findOne({ firebaseUid: req.uid });
+    if (!user) { res.status(404).json({ error: 'Usuário não encontrado' }); return; }
+
+    const COST = 30;
+    const GAIN = 30;
+
+    if (user.hp >= user.maxHp) {
+      res.status(400).json({ error: 'Seu HP já está cheio.' });
+      return;
+    }
+    if (user.xp < COST) {
+      res.status(400).json({ error: `XP insuficiente. Você precisa de ${COST} XP.` });
+      return;
+    }
+
+    user.xp -= COST;
+    user.hp = Math.min(user.hp + GAIN, user.maxHp);
+    await user.save();
+
+    await XpLog.create({
+      user: user._id,
+      amount: -COST,
+      reason: `Poção de HP usada (+${GAIN} HP)`,
+    });
+
+    res.json({ user, gained: GAIN });
+  } catch {
+    res.status(500).json({ error: 'Erro ao usar poção' });
+  }
+});
+
 // GET /api/auth/me — retorna perfil do usuário autenticado
 router.get('/me', authMiddleware, async (req: AuthRequest, res: Response) => {
   try {
