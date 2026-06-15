@@ -94,6 +94,11 @@ export default function ProfileScreen() {
         <Text style={s.editBtnText}>Editar perfil</Text>
       </TouchableOpacity>
 
+      {/* Histórico de XP */}
+      <TouchableOpacity style={s.historyBtn} onPress={() => router.push('/xp-history')}>
+        <Text style={s.historyBtnText}>Histórico de XP</Text>
+      </TouchableOpacity>
+
       {/* Logout */}
       <TouchableOpacity style={s.logoutBtn} onPress={handleLogout}>
         <Text style={s.logoutText}>Sair da conta</Text>
@@ -149,6 +154,11 @@ const s = StyleSheet.create({
     paddingVertical: 14, alignItems: 'center', marginBottom: 10,
   },
   editBtnText: { color: '#fff', fontWeight: 'bold', fontSize: 15 },
+  historyBtn: {
+    backgroundColor: '#16213E', borderRadius: 10, borderWidth: 1, borderColor: '#0F3460',
+    paddingVertical: 14, alignItems: 'center', marginBottom: 10,
+  },
+  historyBtnText: { color: '#4CAF50', fontWeight: 'bold', fontSize: 15 },
   logoutBtn: {
     borderWidth: 1, borderColor: '#E94560', borderRadius: 10,
     paddingVertical: 14, alignItems: 'center', marginTop: 8,

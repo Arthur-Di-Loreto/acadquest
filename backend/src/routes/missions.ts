@@ -3,6 +3,7 @@ import { authMiddleware, AuthRequest } from '../middleware/auth';
 import { Mission } from '../models/Mission';
 import { User } from '../models/User';
 import { applyLevelUp } from '../utils/levelUp';
+import { XpLog } from '../models/XpLog';
 
 const router = Router();
 router.use(authMiddleware);
@@ -78,12 +79,19 @@ router.patch('/:id/complete', async (req: AuthRequest, res: Response) => {
     mission.completedAt = new Date();
     await mission.save();
 
-    // XP para todos os membros atribuídos + verificar level up
+    // XP para todos os membros atribuídos + verificar level up + log
     const members = await User.find({ _id: { $in: mission.assignedTo } });
     for (const member of members) {
       member.xp += mission.xpReward;
-      applyLevelUp(member);
+      const leveled = applyLevelUp(member);
       await member.save();
+
+      await XpLog.create({
+        user: member._id,
+        amount: mission.xpReward,
+        reason: leveled ? `Missão concluída (+nível!)` : 'Missão concluída',
+        missionTitle: mission.title,
+      });
     }
 
     res.json(mission);
