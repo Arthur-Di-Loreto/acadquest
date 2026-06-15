@@ -3,6 +3,7 @@ import {
   View, Text, StyleSheet, ScrollView, TouchableOpacity,
   ActivityIndicator, RefreshControl,
 } from 'react-native';
+import { useRouter } from 'expo-router';
 import { getPlayerRanking, getClanRanking, PlayerRank, ClanRank } from '../../src/services/rankingService';
 
 type Tab = 'players' | 'clans';
@@ -10,6 +11,7 @@ type Tab = 'players' | 'clans';
 const MEDAL: Record<number, string> = { 1: '🥇', 2: '🥈', 3: '🥉' };
 
 export default function RankingScreen() {
+  const router = useRouter();
   const [tab, setTab] = useState<Tab>('players');
   const [players, setPlayers] = useState<PlayerRank[]>([]);
   const [clans, setClans] = useState<ClanRank[]>([]);
@@ -62,7 +64,12 @@ export default function RankingScreen() {
             players.length === 0
               ? <Text style={s.empty}>Nenhum jogador encontrado.</Text>
               : players.map((p) => (
-                <View key={p._id} style={[s.card, p.isMe && s.cardMe]}>
+                <TouchableOpacity
+                  key={p._id}
+                  style={[s.card, p.isMe && s.cardMe]}
+                  onPress={() => !p.isMe && router.push(`/player/${p._id}`)}
+                  activeOpacity={p.isMe ? 1 : 0.7}
+                >
                   <Text style={s.position}>
                     {MEDAL[p.position] ?? `#${p.position}`}
                   </Text>
@@ -74,7 +81,7 @@ export default function RankingScreen() {
                     <Text style={s.detail}>Nível {p.level} · {p.hp} HP</Text>
                   </View>
                   <Text style={s.xp}>{p.xp} XP</Text>
-                </View>
+                </TouchableOpacity>
               ))
           ) : (
             clans.length === 0

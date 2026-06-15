@@ -68,6 +68,7 @@ export default function RootLayout() {
       <Stack.Screen name="create-mission" />
       <Stack.Screen name="edit-profile" />
       <Stack.Screen name="xp-history" />
+      <Stack.Screen name="player/[id]" />
     </Stack>
   );
 }
