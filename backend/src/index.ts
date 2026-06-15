@@ -8,6 +8,7 @@ import clanRoutes from './routes/clans';
 import rankingRoutes from './routes/ranking';
 import xpLogRoutes from './routes/xpLog';
 import userRoutes from './routes/users';
+import achievementRoutes from './routes/achievements';
 import { startExpirationJob } from './jobs/expireMissions';
 
 const app = express();
@@ -24,6 +25,7 @@ app.use('/api/clans', clanRoutes);
 app.use('/api/ranking', rankingRoutes);
 app.use('/api/xp-log', xpLogRoutes);
 app.use('/api/users', userRoutes);
+app.use('/api/achievements', achievementRoutes);
 
 async function start() {
   const uri = process.env.MONGODB_URI;

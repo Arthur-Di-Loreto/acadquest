@@ -2,6 +2,7 @@ import { Router, Response } from 'express';
 import { authMiddleware, AuthRequest } from '../middleware/auth';
 import { Clan } from '../models/Clan';
 import { User } from '../models/User';
+import { grantAchievement } from '../utils/achievements';
 
 const router = Router();
 router.use(authMiddleware);
@@ -26,6 +27,9 @@ router.post('/', async (req: AuthRequest, res: Response) => {
 
     user.clan = clan._id as any;
     await user.save();
+
+    await grantAchievement(user._id as any, 'lider_cla');
+    await grantAchievement(user._id as any, 'entrou_cla');
 
     res.status(201).json(clan);
   } catch (err: any) {
@@ -55,6 +59,8 @@ router.post('/join', async (req: AuthRequest, res: Response) => {
 
     user.clan = clan._id as any;
     await user.save();
+
+    await grantAchievement(user._id as any, 'entrou_cla');
 
     res.json(clan);
   } catch {

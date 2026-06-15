@@ -4,6 +4,7 @@ import { Mission } from '../models/Mission';
 import { User } from '../models/User';
 import { applyLevelUp } from '../utils/levelUp';
 import { XpLog } from '../models/XpLog';
+import { grantAchievement } from '../utils/achievements';
 
 const router = Router();
 router.use(authMiddleware);
@@ -92,6 +93,13 @@ router.patch('/:id/complete', async (req: AuthRequest, res: Response) => {
         reason: leveled ? `Missão concluída (+nível!)` : 'Missão concluída',
         missionTitle: mission.title,
       });
+
+      // Conquistas
+      const completedCount = await Mission.countDocuments({ assignedTo: member._id, status: 'completed' });
+      await grantAchievement(member._id as any, 'primeira_missao');
+      if (completedCount >= 10) await grantAchievement(member._id as any, 'dez_missoes');
+      if (member.level >= 5)  await grantAchievement(member._id as any, 'nivel_5');
+      if (member.level >= 10) await grantAchievement(member._id as any, 'nivel_10');
     }
 
     res.json(mission);

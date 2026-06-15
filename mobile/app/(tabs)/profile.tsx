@@ -146,6 +146,11 @@ export default function ProfileScreen() {
         <Text style={s.editBtnText}>Editar perfil</Text>
       </TouchableOpacity>
 
+      {/* Conquistas */}
+      <TouchableOpacity style={s.achievementsBtn} onPress={() => router.push('/achievements')}>
+        <Text style={s.achievementsBtnText}>Conquistas</Text>
+      </TouchableOpacity>
+
       {/* Histórico de XP */}
       <TouchableOpacity style={s.historyBtn} onPress={() => router.push('/xp-history')}>
         <Text style={s.historyBtnText}>Histórico de XP</Text>
@@ -214,6 +219,11 @@ const s = StyleSheet.create({
     paddingVertical: 14, alignItems: 'center', marginBottom: 10,
   },
   editBtnText: { color: '#fff', fontWeight: 'bold', fontSize: 15 },
+  achievementsBtn: {
+    backgroundColor: '#16213E', borderRadius: 10, borderWidth: 1, borderColor: '#E9A800',
+    paddingVertical: 14, alignItems: 'center', marginBottom: 10,
+  },
+  achievementsBtnText: { color: '#E9A800', fontWeight: 'bold', fontSize: 15 },
   historyBtn: {
     backgroundColor: '#16213E', borderRadius: 10, borderWidth: 1, borderColor: '#0F3460',
     paddingVertical: 14, alignItems: 'center', marginBottom: 10,

@@ -3,6 +3,7 @@ import { authMiddleware, AuthRequest } from '../middleware/auth';
 import { User } from '../models/User';
 import { XpLog } from '../models/XpLog';
 import { applyLevelUp } from '../utils/levelUp';
+import { grantAchievement } from '../utils/achievements';
 
 const router = Router();
 
@@ -108,6 +109,9 @@ router.post('/checkin', authMiddleware, async (req: AuthRequest, res: Response) 
         : `Check-in dia ${newStreak}`,
     });
 
+    if (newStreak >= 3) await grantAchievement(user._id as any, 'streak_3');
+    if (newStreak >= 7) await grantAchievement(user._id as any, 'streak_7');
+
     res.json({ user, rewards: { xp: xpGain, hp: hpGain, streak: newStreak } });
   } catch {
     res.status(500).json({ error: 'Erro ao realizar check-in' });
@@ -141,6 +145,8 @@ router.post('/heal', authMiddleware, async (req: AuthRequest, res: Response) => 
       amount: -COST,
       reason: `Poção de HP usada (+${GAIN} HP)`,
     });
+
+    await grantAchievement(user._id as any, 'pocao');
 
     res.json({ user, gained: GAIN });
   } catch {
