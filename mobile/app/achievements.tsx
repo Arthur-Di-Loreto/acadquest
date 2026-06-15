@@ -46,10 +46,14 @@ export default function AchievementsScreen() {
           contentContainerStyle={{ paddingBottom: 40 }}
           renderItem={({ item }) => (
             <View style={[s.card, !item.unlocked && s.cardLocked]}>
-              <Text style={[s.icon, !item.unlocked && s.iconLocked]}>{item.unlocked ? item.icon : '🔒'}</Text>
+              <Text style={[s.icon, !item.unlocked && s.iconLocked]}>
+                {item.unlocked ? item.icon : '🔒'}
+              </Text>
               <View style={s.info}>
                 <Text style={[s.label, !item.unlocked && s.labelLocked]}>{item.label}</Text>
-                <Text style={s.description}>{item.description}</Text>
+                <Text style={[s.description, !item.unlocked && s.descriptionLocked]}>
+                  {item.description}
+                </Text>
                 {item.unlocked && item.unlockedAt ? (
                   <Text style={s.date}>Desbloqueada em {formatDate(item.unlockedAt)}</Text>
                 ) : null}
@@ -77,17 +81,18 @@ const s = StyleSheet.create({
   card: {
     flexDirection: 'row', alignItems: 'center',
     backgroundColor: '#16213E', borderRadius: 12, padding: 14,
-    marginBottom: 10, borderWidth: 1, borderColor: '#0F3460', gap: 14,
+    marginBottom: 10, borderWidth: 1, borderColor: '#4CAF50', gap: 14,
   },
-  cardLocked: { opacity: 0.45 },
+  cardLocked: { borderColor: '#1e2a3a', backgroundColor: '#111827' },
 
   icon: { fontSize: 32, width: 42, textAlign: 'center' },
-  iconLocked: { opacity: 0.6 },
+  iconLocked: { fontSize: 24 },
 
   info: { flex: 1 },
   label: { color: '#fff', fontSize: 15, fontWeight: 'bold', marginBottom: 2 },
-  labelLocked: { color: '#888' },
+  labelLocked: { color: '#aaa' },
   description: { color: '#888', fontSize: 12 },
+  descriptionLocked: { color: '#555' },
   date: { color: '#4CAF50', fontSize: 11, marginTop: 4 },
 
   badge: {
